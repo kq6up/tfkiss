@@ -15,10 +15,10 @@ DOCS = alas.eng alas.txt copyrght.txt rfc1226 tfkiss.doc
 all:
 
 install:
-	$(MKDIR) ${tfkiss_doc_dir}
+	$(MKDIR) ${DESTDIR}${tfkiss_doc_dir}
 	@for i in $(DOCS); \
 	do \
-		$(INSTALL_DATA) $$i ${tfkiss_doc_dir}; \
+		$(INSTALL_DATA) $$i ${DESTDIR}${tfkiss_doc_dir}; \
 	done;
 
 clean:
