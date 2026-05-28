@@ -1184,7 +1184,7 @@ tfkiss_log_dir=${prefix}/tfkiss
 tfkiss_run_dir=${prefix}/tfkiss
 
 case "$target" in
-	*-*-netbsd*)
+	*-*-netbsd* | *-*-dragonfly*)
 		cat >> confdefs.h <<\EOF
 #define HAVE_CRTSCTS 1
 EOF
