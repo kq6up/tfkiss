@@ -306,6 +306,13 @@ typedef struct timebl              /* "time block", Zeit/Datums-Stamp :   */
 
 /* ACHTUNG: mbhead muss genauso lang sein wie mb !                        */
 
+/* MB and MBHEAD must be the same size (the allocator treats them
+ * interchangeably).  On 32-bit systems rsvd2[24] achieves this.
+ * On 64-bit systems the six pointers in MBHEAD are each 4 bytes
+ * larger (6 * 4 = 24 bytes extra), so rsvd2 must shrink to 0.
+ * __SIZEOF_POINTER__ is a GCC built-in giving the pointer size in bytes. */
+#define MBHEAD_RSVD2_SIZE (24 - 6 * (__SIZEOF_POINTER__ - 4))
+
 typedef struct mbhead         /* "message buffer head",                   */
   {                           /* Datenbuffer-Liste, Kopf :                */
     struct mbhead   *nextmh;  /*   naechster Eintrag in Liste             */
@@ -336,7 +343,9 @@ typedef struct mbhead         /* "message buffer head",                   */
                               /*     NO  = sonst                          */
     char             rsvd[10];/*   (damit insgesamt Laenge wie mb)        */
     TIMEBL           btime;   /*   Buffer-Time fuer Zeit/Datum-Stamps     */
-    char            rsvd2[24];/* FEF */
+#if MBHEAD_RSVD2_SIZE > 0
+    char            rsvd2[MBHEAD_RSVD2_SIZE]; /* padding: sizeof(MBHEAD)==sizeof(MB) */
+#endif
 
   } MBHEAD;
 

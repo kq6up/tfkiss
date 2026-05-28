@@ -42,7 +42,9 @@
 #endif
 
 #ifndef HAVE_SOCKLEN_T
-#define socklen_t int
+/* socklen_t is provided by sys/socket.h on all modern platforms;
+ * the original definition as int is incorrect on 64-bit systems
+ * where socklen_t is unsigned int. */
 #endif
 
 #define unsigned unsigned short
@@ -55,7 +57,7 @@
 #define L2BREMSE   60         /* Freie Buffer bei deren Unterschreitung   */
                               /* der TNC BUSY wird und alles wegwirft..   */
 #define L2GAS      80         /* Gasgeben, wieder genug Buffer frei..     */
-#define HBREMSE    40         /* Wie oben, aber f�r Terminal-Seite        */
+#define HBREMSE    40         /* Wie oben, aber fÂr Terminal-Seite        */
 #define MBREMSE   128         /* keine Frames mehr in den Monitorbuffer   */
 #define CBREMSE    64         /* Connect nur annehmen wenn genug frei..   */
 #define TXBREMSE   32         /* jetzt auch noch TXFRAMES wegwerfen..     */

@@ -3,25 +3,28 @@
  * Copyright 1991, Michael Westerhof, Sun Microsystems, Inc.
  * This software may be freely used, distributed, or modified, providing
  * this header is not removed.
- *
  */
 
 /*
- * Adpated for use with TFKISS by Mark Wahl, DL4YBG, 960131
+ * Adapted for use with TFKISS by Mark Wahl, DL4YBG, 960131
+ * Updated for C99/64-bit correctness: ANSI prototypes, fixed inet_addr
+ * sign-comparison, added missing bounds check in route_add.
  */
 
-
 #include <stdio.h>
+/* arpa/inet.h required for inet_ntoa() and inet_addr() on all platforms;
+ * was previously inside USE_AXIP guard, causing implicit declaration
+ * warnings and incorrect 32-bit pointer casts on 64-bit systems. */
+#include <arpa/inet.h>
 #include "config.h"
 #ifdef USE_AXIP
 #include "axip.h"
 #include <sys/types.h>
-#include <memory.h>
+#include <string.h>
 #include <netinet/in.h>
 
 #ifdef __NetBSD__
 #include <sys/socket.h>
-#include <arpa/inet.h>
 #endif
 
 /*
@@ -52,7 +55,7 @@ struct route_table_entry default_route;
 
 /* Initialize the routing table */
 void
-route_init()
+route_init(void)
 {
 	default_route.callsign[0] = '\0';	/* set to non-zero if valid */
 	route_tbl_top = 0;
@@ -60,25 +63,21 @@ route_init()
 
 /* Add a new route entry */
 void
-route_add(ip, call, udpport, default_rt)
-unsigned char *ip;
-unsigned char *call;
-int udpport;
-int default_rt;
+route_add(unsigned char *ip, unsigned char *call, int udpport, int default_rt)
 {
 	int i;
 
-	if(ip==NULL) return;
+	if (ip == NULL) return;
 
-	if(default_rt){
+	if (default_rt) {
 		default_route.callsign[0] = 1;		/* mark valid */
-		for(i=1;i<7;i++)default_route.callsign[i] = 0;
+		for (i = 1; i < 7; i++) default_route.callsign[i] = 0;
 		default_route.padcall = 0;
 		(void)memcpy(default_route.ip_addr, ip, 4);
 		default_route.udp_port = htons(udpport);
 		default_route.pad1 = 0;
 		default_route.pad2 = 0;
-		sprintf(helpstr,"added default route: \t%s\t%s\t%d",
+		sprintf(helpstr, "added default route: \t%s\t%s\t%d",
 			(char *)inet_ntoa(*(struct in_addr *)default_route.ip_addr),
 			default_route.udp_port ? "udp" : "ip",
 			ntohs(default_route.udp_port));
@@ -86,19 +85,20 @@ int default_rt;
 		return;
 	}
 
-	if(call==NULL) return;
-	if(route_tbl_top >= TABLE_SIZE){
-		(void)fprintf(stderr,"Routing table is full; entry ignored.\n");
+	if (call == NULL) return;
+	if (route_tbl_top >= TABLE_SIZE) {
+		(void)fprintf(stderr, "Routing table is full; entry ignored.\n");
+		return;
 	}
 
-	for(i=0;i<6;i++)route_tbl[route_tbl_top].callsign[i] = call[i] & 0xfe;
+	for (i = 0; i < 6; i++) route_tbl[route_tbl_top].callsign[i] = call[i] & 0xfe;
 	route_tbl[route_tbl_top].callsign[6] = (call[6] & 0x1e) | 0x60;
 	route_tbl[route_tbl_top].padcall = 0;
 	(void)memcpy(route_tbl[route_tbl_top].ip_addr, ip, 4);
 	route_tbl[route_tbl_top].udp_port = htons(udpport);
 	route_tbl[route_tbl_top].pad1 = 0;
 	route_tbl[route_tbl_top].pad2 = 0;
-	sprintf(helpstr,"added route: %s\t%s\t%s\t%d",
+	sprintf(helpstr, "added route: %s\t%s\t%s\t%d",
 			call_to_a(route_tbl[route_tbl_top].callsign),
 			(char *)inet_ntoa(*(struct in_addr *)route_tbl[route_tbl_top].ip_addr),
 			route_tbl[route_tbl_top].udp_port ? "udp" : "ip",
@@ -111,68 +111,65 @@ int default_rt;
 /*
  * Return an IP address and port number given a callsign.
  * We return a pointer to the address; the port number can be found
- * immediately following the IP address. (UGLY coding; to be fixed later!)
+ * immediately following the IP address.
  */
-
 unsigned char *
-call_to_ip(call)
-unsigned char *call;
+call_to_ip(unsigned char *call)
 {
 	int i;
 	unsigned char mycall[7];
 
-	if(call==NULL)return NULL;
+	if (call == NULL) return NULL;
 
-	for(i=0;i<6;i++)mycall[i] = call[i] & 0xfe;
+	for (i = 0; i < 6; i++) mycall[i] = call[i] & 0xfe;
 	mycall[6] = (call[6] & 0x1e) | 0x60;
 
-	sprintf(helpstr,"lookup call %s ",call_to_a(mycall));
-	for(i=0;i<route_tbl_top;i++){
-		if(addrmatch(mycall,route_tbl[i].callsign)){
-			sprintf(helpstr2,"found ip addr %s",
+	sprintf(helpstr, "lookup call %s ", call_to_a(mycall));
+	for (i = 0; i < route_tbl_top; i++) {
+		if (addrmatch(mycall, route_tbl[i].callsign)) {
+			sprintf(helpstr2, "found ip addr %s",
 				(char *)inet_ntoa(*(struct in_addr *)route_tbl[i].ip_addr));
-			strcat(helpstr,helpstr2);
+			strcat(helpstr, helpstr2);
 			LOGL4(helpstr);
 			return route_tbl[i].ip_addr;
 		}
 	}
 
-	if(default_route.callsign[0]){
-		sprintf(helpstr2,"failed, using default ip addr %s",
+	if (default_route.callsign[0]) {
+		sprintf(helpstr2, "failed, using default ip addr %s",
 				(char *)inet_ntoa(*(struct in_addr *)default_route.ip_addr));
-			strcat(helpstr,helpstr2);
+			strcat(helpstr, helpstr2);
 			LOGL4(helpstr);
 			return default_route.ip_addr;
 	}
 
-	strcat(helpstr,"failed.");
+	strcat(helpstr, "failed.");
 	return NULL;
 }
 
 /* print out the list of routes */
 void
-dump_routes()
+dump_routes(void)
 {
 	int i;
 
-	sprintf(helpstr,"\n%d active routes, %d maximum",route_tbl_top,TABLE_SIZE);
+	sprintf(helpstr, "\n%d active routes, %d maximum", route_tbl_top, TABLE_SIZE);
 	LOGL1(helpstr);
-	for(i=0;i<route_tbl_top;i++){
-		sprintf(helpstr2,"  %s\t%s\t%s\t%d",
+	for (i = 0; i < route_tbl_top; i++) {
+		sprintf(helpstr2, "  %s\t%s\t%s\t%d",
 			call_to_a(route_tbl[i].callsign),
 			(char *)inet_ntoa(*(struct in_addr *)route_tbl[i].ip_addr),
 			route_tbl[i].udp_port ? "udp" : "ip",
 			ntohs(route_tbl[i].udp_port));
-		LOGL1(helpstr);
+		LOGL1(helpstr2);
 	}
-	if(default_route.callsign[0]){
-		sprintf(helpstr2,"default route\t%s\t%s\t%d",
+	if (default_route.callsign[0]) {
+		sprintf(helpstr2, "default route\t%s\t%s\t%d",
 			(char *)inet_ntoa(*(struct in_addr *)default_route.ip_addr),
 			default_route.udp_port ? "udp" : "ip",
 			ntohs(default_route.udp_port));
-		LOGL1(helpstr);
+		LOGL1(helpstr2);
 	}
 	(void)fflush(stdout);
 }
 #endif
-

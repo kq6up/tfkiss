@@ -8,7 +8,9 @@
  * AX25 frames.
  */
 /*
- * Adpated for use with TFKISS by Mark Wahl, DL4YBG, 960309
+ * Adapted for use with TFKISS by Mark Wahl, DL4YBG, 960309
+ * Updated for C99/64-bit correctness: ANSI prototypes, fixed printf misuse
+ * in dump_ax25frame (was calling printf with format in wrong argument).
  */
 
 #include "config.h"
@@ -32,61 +34,38 @@
 /*
  * Declaration of external functions
  */
-extern void send_kiss(char type,char *buf, int len);
+extern void send_kiss(unsigned char type, unsigned char *buf, int len);
 extern void put_error(char *str);
 
 /*
  * Initialize the process variables
  */
-
 void
-process_init()
+process_init(void)
 {
 }
 
 /*
- * handle a frame given us by the kiss routines.  The buf variable is
- * a pointer to an AX25 frame.  Note that the AX25 frame from kiss does
- * not include the CRC bytes.  These are computed by this routine, and
- * it is expected that the buffer we have has room for the CRC bytes.
- * We will either dump this frame, or send it via the IP interface.
- * 
- * If we are in digi mode, we validate in several ways:
- *   a) we must be the next digi in line to pick up the packet
- *   b) the next site to get the packet (the next listed digi, or
- *      the destination if we are the last digi) must be known to
- *      us via the route table.
- * If we pass validation, we then set the digipeated bit for our entry
- * in the packet, compute the CRC, and send the packet to the IP
- * interface.
- *
- * If we are in tnc mode, we have less work to do.
- *   a) the next site to get the packet (the next listed digi, or
- *      the destination) must be known to us via the route table.
- * If we pass validation, we compute the CRC, and send the packet to
- * the IP interface.
+ * handle a frame given us by the kiss routines.
  */
-
 int
-from_kiss(buf, l)
-unsigned char *buf;
-int l;
+from_kiss(unsigned char *buf, int l)
 {
 	unsigned char *a, *ipaddr;
 
-	if(l<15){
+	if (l < 15) {
 		LOGL2("from_kiss: dumped - length wrong!");
 		return 0;
 	}
 
-	if(loglevel>2)dump_ax25frame("from_kiss: ", buf, l);
+	if (loglevel > 2) dump_ax25frame("from_kiss: ", buf, l);
 
-	if(digi){               /* if we are in digi mode */
+	if (digi) {               /* if we are in digi mode */
 		a = next_addr(buf);
-		if(NOT_ME(a)){
+		if (NOT_ME(a)) {
 			return 0;
 		}
-		if(a==buf){     /* must be a digi */
+		if (a == buf) {     /* must be a digi */
 			return 0;
 		}
 		SETREPEATED(a);
@@ -111,49 +90,34 @@ int l;
 }
 
 /*
- * handle a frame given us by the IP routines.  The buf variable is
- * a pointer to an AX25 frame.
- * Note that the frame includes the CRC bytes, which we dump ASAP.
- * We will either dump this frame, or send it via the KISS interface.
- * 
- * If we are in digi mode, we only validate that:
- *   a) we must be the next digi in line to pick up the packet
- * If we pass validation, we then set the digipeated bit for our entry
- * in the packet, and send the packet to the KISS send routine.
- *
- * If we are in tnc mode, we validate pretty well nothing, just like a
- * real TNC...  #define FILTER_TNC will change this.
- * We simply send the packet to the KISS send routine.
+ * handle a frame given us by the IP routines.
  */
-
 void
-from_ip(buf, l)
-unsigned char *buf;
-int l;
+from_ip(unsigned char *buf, int l)
 {
 	int port = 0;
 	unsigned char *a;
 
-	if(!ok_crc(buf, l)){
+	if (!ok_crc(buf, l)) {
 		LOGL2("from_ip: dumped - CRC incorrect!");
 		return;
 	}
 	l = l - 2;      /* dump the blasted CRC */
 
-	if(l<15){
+	if (l < 15) {
 		LOGL2("from_ip: dumped - length wrong!");
 		return;
 	}
 
-	if(loglevel>2)dump_ax25frame("from_ip: ", buf, l);
+	if (loglevel > 2) dump_ax25frame("from_ip: ", buf, l);
 
-	if(digi){               /* if we are in digi mode */
+	if (digi) {               /* if we are in digi mode */
 		a = next_addr(buf);
-		if(NOT_ME(a)){
+		if (NOT_ME(a)) {
 			LOGL2("from_ip: (digi) dumped - not for me!");
 			return;
 		}
-		if(a==buf){     /* must be a digi */
+		if (a == buf) {     /* must be a digi */
 			LOGL2("from_ip: (digi) dumped - I am destination!");
 			return;
 		}
@@ -168,18 +132,17 @@ int l;
  * return true if the addresses supplied match
  */
 int
-addrmatch(a,b)
-unsigned char *a, *b;
+addrmatch(unsigned char *a, unsigned char *b)
 {
-	if((*a=='\0') || (*b=='\0'))return 0;
+	if ((*a == '\0') || (*b == '\0')) return 0;
 
-	if((*a++^*b++)&0xfe)return 0;   /* "K" */
-	if((*a++^*b++)&0xfe)return 0;   /* "A" */
-	if((*a++^*b++)&0xfe)return 0;   /* "9" */
-	if((*a++^*b++)&0xfe)return 0;   /* "W" */
-	if((*a++^*b++)&0xfe)return 0;   /* "S" */
-	if((*a++^*b++)&0xfe)return 0;   /* "B" */
-	if((*a++^*b++)&0x1e)return 0;   /* ssid */
+	if ((*a++ ^ *b++) & 0xfe) return 0;   /* "K" */
+	if ((*a++ ^ *b++) & 0xfe) return 0;   /* "A" */
+	if ((*a++ ^ *b++) & 0xfe) return 0;   /* "9" */
+	if ((*a++ ^ *b++) & 0xfe) return 0;   /* "W" */
+	if ((*a++ ^ *b++) & 0xfe) return 0;   /* "S" */
+	if ((*a++ ^ *b++) & 0xfe) return 0;   /* "B" */
+	if ((*a++ ^ *b++) & 0x1e) return 0;   /* ssid */
 	return 1;
 }
 
@@ -187,49 +150,42 @@ unsigned char *a, *b;
  * return pointer to the next station to get this packet
  */
 unsigned char *
-next_addr(f)
-unsigned char *f;
+next_addr(unsigned char *f)
 {
 	unsigned char *a;
 
 /* If no digis, return the destination address */
-	if(NO_DIGIS(f))return f;
+	if (NO_DIGIS(f)) return f;
 
 /* check each digi field.  The first one that hasn't seen it is the one */
 	a = f + 7;
 	do {
 		a += 7;
-		if(NOTREPEATED(a))return a;
-	}while(NOT_LAST(a));
+		if (NOTREPEATED(a)) return a;
+	} while (NOT_LAST(a));
 
 /* all the digis have seen it.  return the destination address */
 	return f;       
 }
 
 /*
- * tack on the CRC for the frame.  Note we assume the buffer is long
- * enough to have the two bytes tacked on.
+ * tack on the CRC for the frame.
  */
 void
-add_crc(buf, l)
-unsigned char *buf;
-int l;
+add_crc(unsigned char *buf, int l)
 {
 	unsigned short int u;
 
 	u = compute_crc(buf, l);
-	buf[l] = u&0xff;                /* lsb first */
-	buf[l+1] = (u>>8)&0xff;         /* msb next */
+	buf[l]   = u & 0xff;           /* lsb first */
+	buf[l+1] = (u >> 8) & 0xff;    /* msb next */
 }
 
 /*
  * Dump AX25 frame.
  */
 void
-dump_ax25frame(t, buf, l)
-unsigned char *buf;
-char *t;
-int l;
+dump_ax25frame(char *t, unsigned char *buf, int l)
 {
 #ifdef DEBUG
 	int i;
@@ -238,36 +194,37 @@ int l;
 	char tmpstr[256];
 	char hlpstr[256];
 
-	(void)sprintf(hlpstr,"%s AX25: (l=%3d)   ", t, l);
+	/* original code called printf(tmpstr, ...) with the format in the wrong
+	 * argument position; use snprintf throughout for correctness and safety. */
+	snprintf(hlpstr, sizeof(hlpstr), "%s AX25: (l=%3d)   ", t, l);
 
-	if(l<15){
-		(void)printf(tmpstr,"Bogus size...");
-		strcat(hlpstr,tmpstr);
+	if (l < 15) {
+		strncat(hlpstr, "Bogus size...", sizeof(hlpstr) - strlen(hlpstr) - 1);
 		put_error(hlpstr);
 		return;
 	}
 
-	(void)sprintf(tmpstr,"%s -> ", call_to_a(buf+7));
-	strcat(hlpstr,tmpstr);
-	(void)sprintf(tmpstr,"%s", call_to_a(buf));
-	strcat(hlpstr,tmpstr);
+	snprintf(tmpstr, sizeof(tmpstr), "%s -> ", call_to_a(buf+7));
+	strncat(hlpstr, tmpstr, sizeof(hlpstr) - strlen(hlpstr) - 1);
+	snprintf(tmpstr, sizeof(tmpstr), "%s", call_to_a(buf));
+	strncat(hlpstr, tmpstr, sizeof(hlpstr) - strlen(hlpstr) - 1);
 
-	if(ARE_DIGIS(buf)){
-		(void)sprintf(tmpstr," v");
-		strcat(hlpstr,tmpstr);
-		a = buf+7;
-		do{
-			a+=7;
-			(void)printf(" %s", call_to_a(a));
-			strcat(hlpstr,tmpstr);
-			if(REPEATED(a))strcat(hlpstr,"*");
-		}while(NOT_LAST(a));
+	if (ARE_DIGIS(buf)) {
+		strncat(hlpstr, " v", sizeof(hlpstr) - strlen(hlpstr) - 1);
+		a = buf + 7;
+		do {
+			a += 7;
+			snprintf(tmpstr, sizeof(tmpstr), " %s", call_to_a(a));
+			strncat(hlpstr, tmpstr, sizeof(hlpstr) - strlen(hlpstr) - 1);
+			if (REPEATED(a))
+				strncat(hlpstr, "*", sizeof(hlpstr) - strlen(hlpstr) - 1);
+		} while (NOT_LAST(a));
 	}
 
 	put_error(hlpstr);
 
 #ifdef DEBUG
-	for(i=0;i<l;i++)(void)printf("%02x ",buf[i]);
+	for (i = 0; i < l; i++) (void)printf("%02x ", buf[i]);
 	(void)printf("\n");
 #endif
 

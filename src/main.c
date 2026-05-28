@@ -53,13 +53,16 @@
 
 #define TFKISS_MAIN
 #include "all.h"
+/* all.h defines "unsigned" as "unsigned short" for the TF firmware's
+ * 16-bit internal data types (timers, counters, struct members in l2*.c
+ * and tf*.c). Undefine it here so that host-side code in this file uses
+ * the standard C meaning of "unsigned" (unsigned int). */
+#undef unsigned
 #include "tf.h"
 #include "l2.h"
 #include "tfext.h"
 #include "kiss.h"
 #include "version.h"
-
-#undef unsigned
 
 #ifdef USE_AXIP
 #include <sys/socket.h>
@@ -71,10 +74,10 @@
 #endif
 
 /* external function declarations */
-extern void append_crc_16();
-extern void append_crc_rmnc();
-extern int check_crc_16();
-extern int check_crc_rmnc();
+extern void append_crc_16(char *buffer, int *len);
+extern void append_crc_rmnc(char *buffer, int *len);
+extern int check_crc_16(char *buffer, int *len);
+extern int check_crc_rmnc(char *buffer, int *len);
 extern void exit_proc();
 extern void hputs();
 extern void hputud();
@@ -166,7 +169,7 @@ int sock;
 struct sockaddr_in udpbind;
 struct sockaddr_in to;
 struct sockaddr_in from;
-int fromlen;
+socklen_t fromlen; /* must match recvfrom() signature; int is wrong on 64-bit */
 #endif
 
 /* defines for rx_state */
@@ -183,11 +186,13 @@ int fromlen;
 
 #define TTKISS "\033@k\r\n"
 
-static int exit_all();
+static int exit_all(void);
 
-/* dummy data */
-unsigned short p1end;
-unsigned short p2strt;
+/* dummy data: defined as unsigned int to match tfext.h post-undef declaration;
+ * firmware files see these as extern unsigned short via all.h macro,
+ * which aliases correctly to the low 16 bits on little-endian. */
+unsigned int p1end;
+unsigned int p2strt;
 
 /* warning/error logging */
 void put_error(char *str)
@@ -209,15 +214,15 @@ void put_error(char *str)
 }
 
 /* dummy procedures */
-void DIinc()
+void DIinc(void)
 {
 }
 
-void decEI()
+void decEI(void)
 {
 }
 
-BOOLEAN iscd()
+BOOLEAN iscd(void)
 {
   return(FALSE);
 }
@@ -232,15 +237,15 @@ BOOLEAN STAled(BOOLEAN dummy)
   return(FALSE);
 }
 
-void xonctl()
+void xonctl(void)
 {
 }
 
-void pushtx()
+void pushtx(void)
 {
 }
 
-void reset()
+void reset(void)
 {
   terminated = 1;
 /*
@@ -250,18 +255,18 @@ void reset()
 */
 }
 
-void kiss()
+void kiss(void)
 {
 }
 
 /* real procedures */
 
-char *minmem()
+char *minmem(void)
 {
   return(buffers);
 }
 
-char *maxmem()
+char *maxmem(void)
 {
   return(buffers+BUFFERSIZE-1);
 }
@@ -298,11 +303,18 @@ struct sockaddr *build_sockaddr(const char *name, int *addrlen)
     addr.si.sin_addr.s_addr = INADDR_ANY;
   } else if (!strcmp(host_name, "loopback")) {
     addr.si.sin_addr.s_addr = inet_addr("127.0.0.1");
-  } else if ((addr.si.sin_addr.s_addr = inet_addr(host_name)) == -1) {
-    struct hostent *hp = gethostbyname(host_name);
-    endhostent();
-    if (!hp) return 0;
-    addr.si.sin_addr.s_addr = ((struct in_addr *) (hp->h_addr))->s_addr;
+  } else {
+    /* inet_addr() returns INADDR_NONE (0xffffffff) on failure;
+     * comparing to -1 is a signed/unsigned mismatch. */
+    in_addr_t resolved = inet_addr(host_name);
+    if (resolved == INADDR_NONE) {
+      struct hostent *hp = gethostbyname(host_name);
+      endhostent();
+      if (!hp) return 0;
+      addr.si.sin_addr.s_addr = ((struct in_addr *) (hp->h_addr))->s_addr;
+    } else {
+      addr.si.sin_addr.s_addr = resolved;
+    }
   }
 
   if (isdigit(*serv_name & 0xff)) {
@@ -318,7 +330,7 @@ struct sockaddr *build_sockaddr(const char *name, int *addrlen)
   return &addr.sa;
 }
 
-void init_console()
+void init_console(void)
 {
   tcgetattr(0,&okbd_termios);
   nkbd_termios = okbd_termios;
@@ -342,7 +354,7 @@ void init_console()
   hostq_len = 0;
 }
 
-void exit_console()
+void exit_console(void)
 {
   struct hostqueue *hostq_ptr;
   
@@ -435,7 +447,7 @@ static int init_kisslink(char *serstr,int speed,
   return(0);
 }
 
-static int exit_kisslink()
+static int exit_kisslink(void)
 {
   tcsetattr(kisslink,TCSADRAIN,&org_termios);
   close(lock);
@@ -443,7 +455,7 @@ static int exit_kisslink()
   return(0);
 }
 
-static int init_axip()
+static int init_axip(void)
 {
 #ifdef USE_AXIP
 
@@ -452,13 +464,13 @@ static int init_axip()
  * address structure.  Since both to and from are static, they are
  * already clear.
  */
-  bzero( (char *)&to, sizeof(struct sockaddr) );
+  memset((char *)&to, 0, sizeof(struct sockaddr));
   to.sin_family = AF_INET;
 
-  bzero( (char *)&from, sizeof(struct sockaddr) );
+  memset((char *)&from, 0, sizeof(struct sockaddr));
   from.sin_family = AF_INET;
 
-  bzero( (char *)&udpbind, sizeof(struct sockaddr) );
+  memset((char *)&udpbind, 0, sizeof(struct sockaddr));
   udpbind.sin_family = AF_INET;
 
   if (ip_mode) {
@@ -501,7 +513,7 @@ static int init_axip()
 #endif
 }
 
-static void exit_axip()
+static void exit_axip(void)
 {
 #ifdef USE_AXIP
   if (ip_mode) close(sock);
@@ -509,7 +521,7 @@ static void exit_axip()
 #endif
 }
 
-static void alloc_hostqbuf()
+static void alloc_hostqbuf(void)
 {
   struct hostqueue *hostq_ptr;
   
@@ -551,7 +563,7 @@ static void puthostq(char ch)
 }
 
 /* get one character out of host-queue */
-static char gethostq()
+static char gethostq(void)
 {
   struct hostqueue *hostq_ptr;
   char ch;
@@ -576,7 +588,7 @@ static char gethostq()
 }
 
 /* txqueue always empty */
-BOOLEAN ishput()
+BOOLEAN ishput(void)
 {
   return(FALSE);
 }
@@ -601,14 +613,14 @@ void hputc(char ch)
 }
 
 /* return if character available */
-BOOLEAN ishget()
+BOOLEAN ishget(void)
 {
   if (hostq_len) return(TRUE);
   else return(FALSE);
 }
 
 /* get one character from console */
-unsigned short hgetc()
+unsigned short hgetc(void)
 {
   char ch;
   
@@ -637,7 +649,7 @@ void send_kisscmd(int cmd,int value)
   char tx_buffer[10];
   char *tx_bufptr;
   int len;
-  char val2;
+  unsigned char val2;
 
   if (!kiss_active) return;
   if (kisstype == KISS_RMNC) return;
@@ -646,7 +658,7 @@ void send_kisscmd(int cmd,int value)
   *tx_bufptr++ = FEND;
   *tx_bufptr++ = (char)cmd;
   len = 2;
-  val2 = (char)(value & 0xFF);
+  val2 = (unsigned char)(value & 0xFF);
   switch (val2) {
   case FEND:
     *tx_bufptr++ = FESC;
@@ -669,7 +681,7 @@ void send_kisscmd(int cmd,int value)
 }
 
 /* send all frames in txbuffer over kisslink */
-static void kissframe_to_tnc()
+static void kissframe_to_tnc(void)
 {
   char tx_buffer[1024];
   char *tx_bufptr;
@@ -702,7 +714,7 @@ static void kissframe_to_tnc()
     }
 #ifdef USE_AXIP
     if (axip_active) {
-      if (from_kiss(tmp_buffer + 1,tmp_buflen - 1)) continue;
+      if (from_kiss((unsigned char *)(tmp_buffer + 1), tmp_buflen - 1)) continue;
     }
 #endif
     if (!kiss_active) continue;
@@ -724,7 +736,7 @@ static void kissframe_to_tnc()
     len = 1;
     tmp_bufptr = tmp_buffer;
     for (i=0;i<tmp_buflen;i++) {
-      switch (*tmp_bufptr) {
+      switch ((unsigned char)*tmp_bufptr) {
       case FEND:
         *tx_bufptr++ = FESC;
         *tx_bufptr++ = TFEND;
@@ -788,9 +800,7 @@ static void frame_valid(char *buffer,int len,int type)
 
 /* Convert ascii callsign to internal format */
 int
-a_to_call(text, tcall)
-char *text;
-unsigned char *tcall;
+a_to_call(char *text, unsigned char *tcall)
 {
   int i;
   int ssid;
@@ -804,7 +814,7 @@ unsigned char *tcall;
   }
   tcall[6] = '\0';
 
-  for (i = 0;i < strlen(text);i++) {
+  for (i = 0;i < (int)strlen(text);i++) {
     c = text[i];
     if (c == '-') {
       ssid = atoi(&text[i+1]);
@@ -821,8 +831,7 @@ unsigned char *tcall;
 
 /* Convert internal callsign to printable format */
 char *
-call_to_a(tcall)
-unsigned char *tcall;
+call_to_a(unsigned char *tcall)
 {
   int i;
   int ssid;
@@ -853,10 +862,7 @@ unsigned char *tcall;
 }
 
 /* interface-procedure for axip */
-void send_kiss(type,buf,len)
-unsigned char type;
-unsigned char *buf;
-int len;
+void send_kiss(unsigned char type, unsigned char *buf, int len)
 {
   rx_port = (type & 0x70) >> 4;
   if (len > MAXKISSLEN) {
@@ -870,9 +876,7 @@ int len;
 
 /* process an I/O error; return true if a retry is needed */
 static int
-io_error(oops,mode)
-int oops;			/* the error flag; < 0 indicates a problem */
-int mode;			/* the fd on which we got the error */
+io_error(int oops, int mode)
 {
 
   if (oops >= 0) return 0;	/* do we have an error ? */
@@ -918,10 +922,7 @@ int mode;			/* the fd on which we got the error */
 
 /* Send an IP frame */
 void
-send_ip(buf, l, targetip)
-unsigned char *buf;
-int l;
-unsigned char *targetip;
+send_ip(unsigned char *buf, int l, unsigned char *targetip)
 {
   int n;
 
@@ -957,13 +958,13 @@ static void framedata_to_queue(char *buffer,int len)
 {
   char *bufptr;
   int i;
-  char ch;
+  unsigned char ch;
   char tmpstr[MAXCHAR];
   
   i = 0;
   bufptr = buffer;
   while (i < len) {
-    ch = *bufptr;
+    ch = (unsigned char)*bufptr;
     switch (rx_state) {
     case ST_BEGIN:
       if (ch == FEND) {
@@ -1084,8 +1085,9 @@ void kicktx(char port)
 }
 
 /* oe1smc */ 
-static void switchback()
+static void switchback(int sig)
 {
+  (void)sig;
   char buf[9] ; 
 
   sprintf ( buf, "%c%c%c%c\n" , (char)255 , (char)255 , (char)0 , (char)0 ) ; 
@@ -1101,13 +1103,14 @@ static void switchback()
   exit ( 0 ) ; 
 }
 
-static void sigterm()
+static void sigterm(int sig)
 {
+  (void)sig;
   terminated = 1;
   signal(SIGTERM, SIG_IGN);
 }
 
-static int exit_all()
+static int exit_all(void)
 {
   free(buffers);
   
@@ -1217,7 +1220,7 @@ int main(int argc,char *argv[])
       }
     }
     else {
-      bzero((char *) &serv_addr,sizeof(serv_addr));
+      memset((char *)&serv_addr, 0, sizeof(serv_addr));
       serv_addr.sun_family = AF_UNIX;
       strcpy(serv_addr.sun_path,tfkiss_socket);
       servlen = sizeof(serv_addr);

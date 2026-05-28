@@ -28,6 +28,8 @@
 
 #include "init.h"
 #include "kiss.h"
+/* arpa/inet.h required for inet_addr() and in_addr_t on all platforms */
+#include <arpa/inet.h>
 
 #ifdef USE_AXIP
 #include <sys/socket.h>
@@ -35,7 +37,6 @@
 #include <netinet/in.h>
 #ifdef __NetBSD__
 #include <sys/socket.h>
-#include <arpa/inet.h>
 #endif
 #include "axip.h"
 #endif
@@ -221,7 +222,7 @@ void save_para()
 #ifdef USE_AXIP
 /* Initialize the config table */
 static void
-axip_config_init()
+axip_config_init(void)
 {
   int i;
 
@@ -238,8 +239,7 @@ axip_config_init()
 
 /* Open and read the config file */
 static int
-axip_config_read(f)
-char *f;
+axip_config_read(char *f)
 {
   FILE *cf;
   char buf[256], cbuf[256];
@@ -289,13 +289,12 @@ char *f;
 
 /* Process each line from the config file.  The return value is encoded. */
 int
-parse_line(buf)
-char *buf;
+parse_line(char *buf)
 {
   char *p, *q;
   unsigned char tcall[7], tip[4];
   struct hostent *he;
-  int i,j, uport, dfalt;
+  int i, j, uport, dfalt;
   p = strtok(buf, " \t\n\r");
 
   if(p==NULL)return 0;
@@ -350,8 +349,11 @@ char *buf;
     if(he!=NULL){
       (void)memcpy(tip, he->h_addr_list[0], 4);
     } else {        /* maybe user specified a numeric addr? */
-      j = inet_addr(q);
-      if(j==-1)return -5;     /* if -1, bad deal! */
+      /* inet_addr() returns INADDR_NONE on failure; use in_addr_t to
+       * avoid signed/unsigned comparison with -1. */
+      { in_addr_t tmp_addr = inet_addr(q);
+      if(tmp_addr==INADDR_NONE)return -5;
+      j = (int)tmp_addr; }
       (void)memcpy(tip, (char *)&j, 4);
     }
 
@@ -376,9 +378,7 @@ char *buf;
 
 #endif
 
-static int analyse_value(str1,str2)
-char str1[];
-char str2[];
+static int analyse_value(char str1[], char str2[])
 {
   int tmp;
   
@@ -542,10 +542,7 @@ void add_dir(char *dir,char *str)
   }
 }
 
-int read_init_file(argc,argv,unlock)
-int argc;
-char *argv[];
-int *unlock;
+int read_init_file(int argc, char *argv[], int *unlock)
 {
   FILE *init_file_fp;
   int file_end;
@@ -725,7 +722,7 @@ int *unlock;
   }
   fclose(init_file_fp);
   if (file_corrupt) {
-    if (line == NULL) line[0] = '\0';
+    /* line is a stack array, cannot be NULL */
     printf("ERROR: %s is in wrong format, wrong line:\n%s\n\n",
            tfkiss_initfile,line);
     return(1);
