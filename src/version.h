@@ -6,7 +6,7 @@
  *  updated: Berndt Josef Wulf, VK5ABN - 26.8.1999
  */
 
-#define VERSION   "TF2.7b/Linux 05Oct96 Copyright (C) by NORD><LINK e.V. 1988-96, DL4YBG 1995/96"
+#define TF_VERSION   "TF2.7b/Linux 05Oct96 Copyright (C) by NORD><LINK e.V. 1988-96, DL4YBG 1995/96"
 #ifdef USE_AXIP
 # ifdef USE_XPID
 #  ifdef USE_FLEXDEC
@@ -43,4 +43,4 @@
 #define SIG7 "          solaris-porting copyright (c) 1999 by hans mayer, oe1smc \015\012"
 #define SIG8 "        netbsd-porting copyright (c) 1999 by Berndt Josef Wulf, VK5ABN\015\012"
 #define SIG6 "\015\012"
-#define SIG_D "                         version 1.2.3 - 12/05/2000 \015\012"
+#define SIG_D "                         version 1.3.0 \015\012"

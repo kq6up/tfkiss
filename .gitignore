@@ -1,0 +1,31 @@
+# Autoconf/automake generated files
+aclocal.m4
+autom4te.cache/
+
+# Build output
+Makefile
+Makefile.in
+src/Makefile
+src/Makefile.in
+doc/Makefile
+doc/Makefile.in
+examples/Makefile
+examples/Makefile.in
+
+# Compiler output
+src/*.o
+src/.deps/
+src/tfkiss
+src/stamp-h1
+src/config.h
+src/config.h.in~
+
+# Configure output
+config.cache
+config.log
+config.status
+
+# Generated config
+examples/tfkiss.ini
+examples/tfkiss.cfg
+configure

@@ -603,7 +603,7 @@ void Ucmd()
 void Vcmd()
   {
     rspini(HMRSMSG);
-    hputs(VERSION);           /* Ausgabe der Versions-Nummer, siehe ALL.H */
+    hputs(TF_VERSION);           /* Ausgabe der Versions-Nummer, siehe ALL.H */
     rspex();
   }
 

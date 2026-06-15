@@ -1,21 +1,99 @@
-This is the release of tfkiss-1.2.5, a port of TheFirmware by
-NORD><LINK, originally written for TNC2 hardware. Refer to the
-copyrght.txt and alas.* files in the doc directory for detailed
-copyright information.
+tfkiss 1.3.0
+============
 
-tfkiss-1.2.5 supports NetBSD, DragonFly BSD, Linux, and Solaris.
-This release adds full 64-bit correctness, modernizes all function
-definitions to ANSI C, and fixes a struct size mismatch on 64-bit
-platforms. DESTDIR staged install support from the NetBSD pkgsrc
-patches is also incorporated. Refer to the CHANGES file for detailed
-information.
+tfkiss is a software implementation of TheFirmware (TF) by NORD><LINK,
+originally written for TNC2 hardware. It implements the KISS protocol
+and supports AX.25 Layer 2, AXIP, XPID, and FLEXNET. It is used in
+amateur packet radio BBS and node setups in conjunction with dpbox
+and TNT.
 
-The source code for tfkiss-1.2.5 can be found at:
-https://github.com/kq6up/tfkiss
+This is a maintained fork of the original work by Berndt Josef Wulf
+VK5ABN. It adds 64-bit correctness fixes, ANSI C modernization, and
+a modernized autoconf/automake build system.
 
-Please send bug reports or comments to christopher.maness@gmail.com
+For copyright information see doc/copyrght.txt and doc/alas.eng.
 
-Enjoy
+Prerequisites
+-------------
 
-73 de Chris
-KQ6UP
+To build tfkiss you need:
+
+  gcc or compatible C compiler
+  make
+  autoconf (only needed when building from git)
+  automake (only needed when building from git)
+
+Building from a release tarball
+--------------------------------
+
+    ./configure --enable-xpid --enable-flexnet --enable-axip
+    make
+    sudo make install
+
+Building from a git clone
+--------------------------
+
+    ./autogen.sh
+    ./configure --enable-xpid --enable-flexnet --enable-axip
+    make
+    sudo make install
+
+Configure options
+-----------------
+
+  --enable-xpid       Enable PID change code support (recommended)
+  --enable-flexnet    Enable FLEXNET support (recommended)
+  --enable-axip       Enable AXIP support (recommended)
+  --enable-hibaud     Enable high baud rate support >38400 (Linux only)
+  --prefix=DIR        Install to DIR instead of /usr/local
+
+Installation
+------------
+
+By default tfkiss installs to /usr/local:
+
+  /usr/local/sbin/tfkiss        the binary
+  /usr/local/etc/tfkiss/        configuration files
+  /usr/local/share/doc/tfkiss/  documentation
+  /usr/local/share/examples/tfkiss/ example configuration files
+
+To install to /usr instead:
+
+    ./configure --prefix=/usr --enable-xpid --enable-flexnet --enable-axip
+
+Configuration
+-------------
+
+After installation, edit the configuration file:
+
+    /usr/local/etc/tfkiss/tfkiss.ini
+    /usr/local/etc/tfkiss/tfkiss.cfg
+
+At minimum you MUST:
+
+  1. Set your callsign in tfkiss.cfg (replace NOCALL with your callsign)
+  2. Verify the device setting in tfkiss.ini points to your TNC's
+     serial port. Common values:
+
+       Linux built-in serial:  /dev/ttyS0
+       Linux USB-to-serial:    /dev/ttyUSB0
+       NetBSD built-in serial: /dev/tty00
+       NetBSD USB-to-serial:   /dev/ttyU0
+       DragonFly:              /dev/ttyd0
+       Solaris:                /dev/ttya
+
+Supported platforms
+-------------------
+
+  Linux (x86, x86_64, arm)
+  NetBSD (x86, x86_64, arm64)
+  DragonFly BSD
+  Solaris
+
+Bug reports
+-----------
+
+Please report bugs at https://github.com/kq6up/tfkiss/issues
+or email christopher.maness@gmail.com
+
+73 de Chris Maness, KQ6UP
