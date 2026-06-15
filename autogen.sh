@@ -8,6 +8,6 @@ set -e
 echo "Bootstrapping tfkiss build system..."
 autoreconf -i
 echo "Done. Now run:"
-echo "  ./configure --enable-xpid --enable-flexnet --enable-axip"
+echo "  ./configure"
 echo "  make"
 echo "  make install"

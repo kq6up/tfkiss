@@ -26,7 +26,7 @@ To build tfkiss you need:
 Building from a release tarball
 --------------------------------
 
-    ./configure --enable-xpid --enable-flexnet --enable-axip
+    ./configure
     make
     sudo make install
 
@@ -34,16 +34,16 @@ Building from a git clone
 --------------------------
 
     ./autogen.sh
-    ./configure --enable-xpid --enable-flexnet --enable-axip
+    ./configure
     make
     sudo make install
 
 Configure options
 -----------------
 
-  --enable-xpid       Enable PID change code support (recommended)
-  --enable-flexnet    Enable FLEXNET support (recommended)
-  --enable-axip       Enable AXIP support (recommended)
+  --disable-xpid      Disable PID change code support (enabled by default)
+  --disable-flexnet   Disable FLEXNET support (enabled by default)
+  --disable-axip      Disable AXIP support (enabled by default)
   --enable-hibaud     Enable high baud rate support >38400 (Linux only)
   --prefix=DIR        Install to DIR instead of /usr/local
 

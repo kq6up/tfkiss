@@ -88,34 +88,37 @@ dnl Feature: XPID
 AC_MSG_CHECKING([whether to enable XPID])
 AC_ARG_ENABLE([xpid],
     [AS_HELP_STRING([--enable-xpid],
-        [enable PID change code support (recommended)])],
+        [enable PID change code support (default: yes)])],
     [AS_IF([test "x$enableval" = "xyes"],
         [AC_DEFINE([USE_XPID], [1], [Enable XPID support])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])],
-    [AC_MSG_RESULT([no])])
+    [AC_DEFINE([USE_XPID], [1], [Enable XPID support])
+     AC_MSG_RESULT([yes (default)])])
 
 dnl Feature: FLEXNET
 AC_MSG_CHECKING([whether to enable FLEXNET support])
 AC_ARG_ENABLE([flexnet],
     [AS_HELP_STRING([--enable-flexnet],
-        [enable FLEXNET support (recommended)])],
+        [enable FLEXNET support (default: yes)])],
     [AS_IF([test "x$enableval" = "xyes"],
         [AC_DEFINE([USE_FLEXDEC], [1], [Enable FLEXNET support])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])],
-    [AC_MSG_RESULT([no])])
+    [AC_DEFINE([USE_FLEXDEC], [1], [Enable FLEXNET support])
+     AC_MSG_RESULT([yes (default)])])
 
 dnl Feature: AXIP
 AC_MSG_CHECKING([whether to enable AXIP support])
 AC_ARG_ENABLE([axip],
     [AS_HELP_STRING([--enable-axip],
-        [enable AXIP support (recommended)])],
+        [enable AXIP support (default: yes)])],
     [AS_IF([test "x$enableval" = "xyes"],
         [AC_DEFINE([USE_AXIP], [1], [Enable AXIP support])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])],
-    [AC_MSG_RESULT([no])])
+    [AC_DEFINE([USE_AXIP], [1], [Enable AXIP support])
+     AC_MSG_RESULT([yes (default)])])
 
 AC_CONFIG_FILES([
     Makefile
