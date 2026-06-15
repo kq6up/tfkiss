@@ -5,13 +5,13 @@
 # serial device path matches your TNC connection.
 
 # Directory for config files
-tfkiss_conf_dir @sysconfdir@/tfkiss
+tfkiss_conf_dir @tfkiss_conf_dir@
 
 # Directory for log files
-tfkiss_log_dir @localstatedir@/log
+tfkiss_log_dir @tfkiss_log_dir@
 
 # Directory for status/run files
-tfkiss_run_dir @localstatedir@/run
+tfkiss_run_dir @tfkiss_run_dir@
 
 # File containing process id
 tfkiss_procfile tfkiss.pid
