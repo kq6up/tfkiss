@@ -40,12 +40,16 @@ esac
 AC_SUBST([tfkiss_device])
 
 dnl Installation directories
-tfkiss_conf_dir="${sysconfdir}/tfkiss"
-tfkiss_doc_dir="${datadir}/doc/tfkiss"
-tfkiss_log_dir="${localstatedir}/log"
-tfkiss_run_dir="${localstatedir}/run"
-tfkiss_spool_dir="${localstatedir}/spool/tfkiss"
-tfkiss_examples_dir="${datadir}/examples/tfkiss"
+dnl Expand paths at configure time by substituting prefix directly.
+dnl This ensures @tfkiss_conf_dir@ etc. in .in files get real paths.
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+test "x$exec_prefix" = xNONE && exec_prefix=$prefix
+eval tfkiss_conf_dir="${sysconfdir}/tfkiss"
+eval tfkiss_doc_dir="${datadir}/doc/tfkiss"
+eval tfkiss_log_dir="${localstatedir}/log"
+eval tfkiss_run_dir="${localstatedir}/run"
+eval tfkiss_spool_dir="${localstatedir}/spool/tfkiss"
+eval tfkiss_examples_dir="${datadir}/examples/tfkiss"
 
 AC_SUBST([tfkiss_conf_dir])
 AC_SUBST([tfkiss_doc_dir])
