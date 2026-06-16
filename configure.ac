@@ -14,6 +14,12 @@ AC_PROG_INSTALL
 dnl Require C99 or later
 AC_PROG_CC_STDC
 
+dnl The firmware source uses multiple translation units that intentionally
+dnl share global definitions (device, speed, speedflag). GCC 10+ changed
+dnl the default from -fcommon to -fno-common, breaking this pattern.
+dnl Use -fcommon to restore the original build behavior.
+CFLAGS="$CFLAGS -fcommon"
+
 dnl Platform-specific settings
 case "$host" in
     *-*-netbsd* | *-*-dragonfly*)
