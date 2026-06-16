@@ -53,16 +53,16 @@
 
 #define TFKISS_MAIN
 #include "all.h"
+/* all.h defines "unsigned" as "unsigned short" for the TF firmware's
+ * 16-bit internal data types (timers, counters, struct members in l2*.c
+ * and tf*.c). Undefine it here so that host-side code in this file uses
+ * the standard C meaning of "unsigned" (unsigned int). */
+#undef unsigned
 #include "tf.h"
 #include "l2.h"
 #include "tfext.h"
 #include "kiss.h"
 #include "version.h"
-/* all.h defines "unsigned" as "unsigned short" for the TF firmware's
- * 16-bit internal data types (timers, counters, struct members in l2*.c
- * and tf*.c). Undefine it after all firmware headers so that host-side
- * code in this file uses the standard C meaning of "unsigned" (unsigned int). */
-#undef unsigned
 
 #ifdef USE_AXIP
 #include <sys/socket.h>
@@ -127,9 +127,9 @@ static struct hostqueue *hostq_root;
 static struct hostqueue *hostq_last;
 static int hostq_len;
 
-extern char device[MAXCHAR];
-extern unsigned int speed;
-extern int speedflag;
+char device[MAXCHAR];
+int speed;
+int speedflag;
 int use_socket;
 static int terminated;
 static int kisslink;
