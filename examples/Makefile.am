@@ -1,17 +1,11 @@
 tfkissconfdir = $(sysconfdir)/tfkiss
 
-dist_tfkissconf_DATA = \
-    tfkiss.cfg
-
 nodist_tfkissconf_DATA = \
+    tfkiss.cfg \
     tfkiss.ini
 
 EXTRA_DIST = \
-    tfkiss.ini.in \
-    tfkiss.ini.smpl \
-    tfkiss.cfg.smpl \
-    linux.cfg \
-    netbsd.cfg \
-    solaris.cfg
+    tfkiss.cfg.in \
+    tfkiss.ini.in
 
-CLEANFILES = tfkiss.ini
+CLEANFILES = tfkiss.cfg tfkiss.ini
