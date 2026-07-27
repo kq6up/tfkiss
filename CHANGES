@@ -89,6 +89,40 @@ version 1.2.5
 - Fixed MBHEAD/MB struct size mismatch on 64-bit platforms via
   MBHEAD_RSVD2_SIZE computed from __SIZEOF_POINTER__ - CM
 
+version 1.3.0
+- Replaced the autoconf 2.13 era build system with modern
+  autoconf/automake; added autogen.sh for building from a git
+  clone - CM
+- Install paths now follow FHS conventions: binary in sbin,
+  documentation in share/doc/tfkiss, configuration in etc/tfkiss - CM
+- Configure now detects the platform and selects a sensible default
+  TNC serial device - CM
+- XPID, FLEXNET and AXIP support are now enabled by default; use
+  --disable-xpid, --disable-flexnet or --disable-axip to turn them
+  off - CM
+- Added -fcommon to the compiler flags; GCC 10 changed the default
+  to -fno-common, which broke the firmware's shared global
+  definitions - CM
+- Rewrote the example configuration files to be minimal, with
+  NOCALL as the placeholder callsign and inline guidance on
+  selecting the serial device - CM
+- Required run and log directories are now created at install
+  time - CM
+- Added LICENSE-NOTES documenting the copyright status of this
+  work - CM
+
+version 1.3.1
+- Fixed the release tarball, which was missing all header files in
+  src and therefore would not compile; headers are now declared to
+  automake via noinst_HEADERS - CM
+- Added autogen.sh to the distribution - CM
+- Build helper scripts are now distributed as real files rather
+  than symbolic links into the build host's automake
+  installation - CM
+- Updated INSTALL, which still described the 1.1.0 release - CM
+- Added a version 1.3.0 entry to this file, which had been
+  omitted - CM
+
 ---------------------------------------------------------------------
 Legend:
   BJW - Berndt Josef Wulf, VK5ABN, wulf@ping.net.au

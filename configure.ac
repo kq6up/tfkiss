@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([tfkiss],[1.3.0],[christopher.maness@gmail.com])
+AC_INIT([tfkiss],[1.3.1],[christopher.maness@gmail.com])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
