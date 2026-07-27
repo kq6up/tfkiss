@@ -4,8 +4,8 @@ Installing tfkiss
 From a release tarball
 ----------------------
 
-    tar zxf tfkiss-1.3.1.tar.gz
-    cd tfkiss-1.3.1
+    tar zxf tfkiss-VERSION.tar.gz
+    cd tfkiss-VERSION
     ./configure
     make
     su -c "make install"
@@ -22,6 +22,8 @@ one extra step to generate the configure script:
     su -c "make install"
 
 Configure options, the installation layout, and the configuration
-required before first use are documented in README. Please read it
+required before first use are documented in README.  Please read it
 before running tfkiss for the first time; at minimum you will need
 to set your callsign and confirm the serial device.
+
+Copyright and licensing are documented in LICENSE-NOTES.

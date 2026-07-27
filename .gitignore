@@ -29,3 +29,4 @@ config.status
 examples/tfkiss.ini
 examples/tfkiss.cfg
 configure
+*.tar.gz

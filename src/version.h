@@ -43,4 +43,4 @@
 #define SIG7 "          solaris-porting copyright (c) 1999 by hans mayer, oe1smc \015\012"
 #define SIG8 "        netbsd-porting copyright (c) 1999 by Berndt Josef Wulf, VK5ABN\015\012"
 #define SIG6 "\015\012"
-#define SIG_D "                         version 1.3.1 \015\012"
+#define SIG_D "                         version 1.3.2 \015\012"

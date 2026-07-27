@@ -4,6 +4,7 @@ EXTRA_DIST = \
     autogen.sh \
     CHANGES \
     INSTALL \
+    LICENSE-NOTES \
     README
 
 distclean-local:

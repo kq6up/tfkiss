@@ -123,6 +123,12 @@ version 1.3.1
 - Added a version 1.3.0 entry to this file, which had been
   omitted - CM
 
+version 1.3.2
+- Added LICENSE-NOTES to the distribution; it was present in the
+  source repository but omitted from the release tarball - CM
+- INSTALL no longer names a specific version, so that it does not
+  go stale at each release - CM
+
 ---------------------------------------------------------------------
 Legend:
   BJW - Berndt Josef Wulf, VK5ABN, wulf@ping.net.au
