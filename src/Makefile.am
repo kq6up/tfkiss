@@ -20,3 +20,15 @@ tfkiss_SOURCES = \
     routing.c
 
 tfkiss_CFLAGS = -funsigned-char
+
+noinst_HEADERS = \
+    all.h \
+    axip.h \
+    init.h \
+    kiss.h \
+    l2.h \
+    l2ext.h \
+    l2s.h \
+    tf.h \
+    tfext.h \
+    version.h

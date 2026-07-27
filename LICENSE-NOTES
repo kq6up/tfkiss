@@ -1,0 +1,146 @@
+tfkiss - Notes on Copyright and Licensing
+=========================================
+
+This file documents the copyright status of tfkiss, the licensing
+terms it is distributed under, and the reasoning behind continuing
+to distribute this modified version. It is provided in the interest
+of transparency for packagers and users.
+
+See doc/copyrght.txt and doc/alas.eng for the original license texts,
+which are distributed unmodified with this software.
+
+
+1. Copyright holders
+--------------------
+
+tfkiss is a layered work with several rights holders:
+
+  - TheFirmware (TF), the AX.25 Layer 2 implementation at the core of
+    this program, is Copyright (c) 1988-1996 NORD><LINK e.V., a German
+    registered association (eingetragener Verein).
+
+  - The Unix port, the autoconf build system, and extensive bug fixes
+    are the work of Berndt Josef Wulf, VK5ABN SK.
+
+  - Solaris support was contributed by Hans Mayer, OE1SMC.
+
+  - Additional fixes were contributed by Matthias Hensler, WS1AC.
+
+  - DragonFly BSD support and DESTDIR install support were contributed
+    via the NetBSD pkgsrc packaging system (2005 and 2009).
+
+  - 64-bit correctness fixes, ANSI C modernization, and the current
+    autoconf/automake build system are the work of Chris Maness, KQ6UP.
+
+All prior copyright notices have been preserved in the source code and
+in the program's startup banner, as required.
+
+
+2. License terms
+----------------
+
+doc/copyrght.txt states that the software may be used free of charge
+for private, non-commercial use by radio amateurs; that the NORD><LINK
+copyright notice may not be removed from either the source or the
+startup message of the compiled program; and that the terms of the
+license distributed with each copy of the software apply, referring to
+ALAS (doc/alas.eng, doc/alas.txt).
+
+ALAS -- the Allgemeine Lizenz fuer Amateurfunk Software (General
+Licence for Amateur Radio Software) -- permits use, copying,
+modification, and distribution for non-commercial purposes, and places
+duties on anyone modifying or distributing the software. Section 4.5
+requires that a modifier clearly indicate their name and address and
+the fact of modification, and distribute the complete source code or
+provide it on demand at cost.
+
+doc/copyrght.txt additionally states that distribution of modified
+versions is permitted only with the prior consent of NORD><LINK. This
+provision is in tension with the ALAS terms that the same document
+directs the reader to, and which ALAS itself applies to all software
+distributed under it.
+
+
+3. Compliance
+-------------
+
+This distribution complies with the ALAS terms in full:
+
+  - Non-commercial. This software is distributed free of charge and
+    is not sold, bundled with any commercial product, or used for
+    commercial purposes.
+
+  - Attribution. The modifier is identified by name, callsign, and
+    email address in this file, in README, and in CHANGES.
+
+  - Modification disclosed. All changes are itemized by version and
+    attributed by author in CHANGES.
+
+  - Complete source. Full source code is distributed with every
+    release and is publicly available at
+    https://github.com/kq6up/tfkiss
+
+  - Copyright notices preserved. The NORD><LINK copyright appears
+    unchanged in the source and in the program's startup banner, as
+    do the notices of all subsequent contributors.
+
+  - Original license texts included and unmodified, and installed
+    with the package.
+
+
+4. On obtaining consent, and on relicensing
+-------------------------------------------
+
+The consent provision in doc/copyrght.txt cannot be satisfied, because
+no rights holder can be located:
+
+  - NORD><LINK e.V. appears to be dissolved. Its website, nordlink.org,
+    is no longer operating and the domain is offered for sale. No
+    successor organization or contact has been identified.
+
+  - Berndt Josef Wulf, VK5ABN, is a Silent Key.
+
+Relicensing the work under a modern free software license such as the
+GNU GPL is likewise not possible. It would require the agreement of
+every rights holder listed in section 1, including a dissolved German
+association and the estate of a deceased author. Furthermore, under
+German copyright law (UrhG Sec. 29), copyright itself is inalienable
+and cannot be transferred except by inheritance; only rights of use may
+be granted, and then only by a rights holder able to grant them.
+
+This software is therefore, in practical terms, an orphaned work. It is
+maintained and distributed here in good faith, in full compliance with
+the ALAS terms that doc/copyrght.txt directs the reader to, and in a
+manner consistent with the evident intent of the original authors: that
+this software remain freely available to radio amateurs for
+non-commercial use, with its source code open and its authorship
+acknowledged.
+
+Precedent for this treatment exists within the NetBSD pkgsrc
+collection, which has distributed a patched tfkiss since 2005 and
+distributes other amateur radio software of similar provenance under
+the license marker "generic-nonlicense" together with a restriction
+against commercial use.
+
+
+5. Standing offer
+-----------------
+
+If any rights holder, heir, successor in interest, or authorized
+representative of NORD><LINK e.V. or of any contributor named above
+wishes to discuss this distribution, please make contact. Any
+reasonable request, including a request to cease distribution, will
+be honored promptly.
+
+    Chris Maness, KQ6UP
+    christopher.maness@gmail.com
+    https://github.com/kq6up/tfkiss
+
+
+6. Disclaimer
+-------------
+
+This document records the maintainer's good-faith understanding of the
+copyright situation. It is not legal advice and does not constitute a
+legal opinion. The software is provided without warranty of any kind,
+as stated in the original license texts.

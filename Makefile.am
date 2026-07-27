@@ -1,6 +1,7 @@
 SUBDIRS = src doc examples
 
 EXTRA_DIST = \
+    autogen.sh \
     CHANGES \
     INSTALL \
     README
