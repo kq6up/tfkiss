@@ -1,6 +1,6 @@
-tfkissconfdir = $(sysconfdir)/tfkiss
+tfkissexamplesdir = $(datadir)/examples/tfkiss
 
-nodist_tfkissconf_DATA = \
+nodist_tfkissexamples_DATA = \
     tfkiss.cfg \
     tfkiss.ini
 

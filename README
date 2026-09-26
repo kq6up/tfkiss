@@ -1,4 +1,4 @@
-tfkiss 1.3.2
+tfkiss 1.3.3
 ============
 
 tfkiss is a software implementation of TheFirmware (TF) by NORD><LINK,
@@ -52,10 +52,9 @@ Installation
 
 By default tfkiss installs to /usr/local:
 
-  /usr/local/sbin/tfkiss        the binary
-  /usr/local/etc/tfkiss/        configuration files
-  /usr/local/share/doc/tfkiss/  documentation
-  /usr/local/share/examples/tfkiss/ example configuration files
+  /usr/local/sbin/tfkiss                    the binary
+  /usr/local/share/doc/tfkiss/              documentation
+  /usr/local/share/examples/tfkiss/         example configuration files
 
 To install to /usr instead:
 
@@ -64,10 +63,13 @@ To install to /usr instead:
 Configuration
 -------------
 
-After installation, edit the configuration file:
+After installation, copy the example configuration files into the
+system configuration directory, then edit the copies.  This keeps a
+later install or upgrade from overwriting local configuration:
 
-    /usr/local/etc/tfkiss/tfkiss.ini
-    /usr/local/etc/tfkiss/tfkiss.cfg
+    sudo mkdir -p /usr/local/etc/tfkiss
+    sudo cp /usr/local/share/examples/tfkiss/tfkiss.ini /usr/local/etc/tfkiss/
+    sudo cp /usr/local/share/examples/tfkiss/tfkiss.cfg /usr/local/etc/tfkiss/
 
 At minimum you MUST:
 
